@@ -16,7 +16,7 @@ I wanted to be able to look up items by tags. Either a single tag or a list of t
 
 /itemsByTab/(tag): Returns a list of items with a tag
 
-/itemsByTagList : json list
+/itemsByTagList : json list curl -X PUT -d ''["tag1", "tag2", "tag3"]' http://itemsByTagList
 
 /insertItem: passes json representation of item and inserts the item
 
