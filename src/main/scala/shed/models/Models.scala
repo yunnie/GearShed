@@ -20,10 +20,6 @@ class GearShed(xa: Transactor[IO]) {
   val getItems: IO[List[Item]] = 
     Queries.getItems.to[List].transact(xa)
 
-  /* Need to decide how to querie? Do I pass in a name?
-   * Do I pass in a json? Return a list because
-   * there could be several items with the same name
-   */
   def getItemByName(name: String): IO[List[Item]] = 
     Queries.getItemByName(name).to[List].transact(xa)
 
@@ -31,9 +27,6 @@ class GearShed(xa: Transactor[IO]) {
     Queries.getItemByTag(label).to[List].transact(xa)
 
   def getItemByTagList(tags: NonEmptyList[String]): IO[List[Item]] = 
-    // Consider using NonEmptyList.fromList(listname)
-    // Rturns a Option[NonEmptyList[A]]
-    
     Queries.getItemByTagList(tags).to[List].transact(xa)
 
   def insertItem(item: Item): IO[Item] = 
@@ -43,10 +36,6 @@ class GearShed(xa: Transactor[IO]) {
       map { id => item.copy(id = Some(id))}
 
   def removeItem(itemId: Int): IO[Int] = 
-  /* Should probably be done by id since that is the only 
-   * thing to be unique 
-   * Should also remove the Item2Tag records with the same item_id
-   * */
     for {
       nItemDeleted <- Queries.removeItem(itemId).run.transact(xa)
       nTagsDeleted <- Queries.removeItemTags(itemId).run.transact(xa)
@@ -62,19 +51,11 @@ class GearShed(xa: Transactor[IO]) {
     Queries.getAllTags.to[List].transact(xa)
 
   def insertTagList(tagList: List[TagLabel]): IO[Int] =
-    /* Need to modify to make sure the tag list is unique */
     for {
       existingTags <- getAllTags
-      /* Convert the list of Tag(id, label) to a list of TagLabel */
       existingTagSet <- IO(existingTags.map(tag => tag.label))
-      /* Find the set difference from the new tags to the existing tags
-       * to see which tags need to be inserted, so that the tags are unique
-       * Can probably use POSTGRES constraint to handle this
-       */ 
       newTags      <- IO((tagList.toSet diff existingTagSet.toSet).toList)
-      /* Finally, at long last, run the query */
       i <- Queries.insertTagList.updateMany(newTags).
              transact(xa)
     } yield i
-
 }

@@ -12,13 +12,6 @@ import shed.db._
 import shed.config._
 
 object Setup {
-  /* A set of functions to create and remove the 
-   * tables for this project 
-   *
-   * The functions are intended to be run from the 
-   * REPL, but could be wrapped in a command line
-   * application. 
-   */
 
   val createTables: ConnectionIO[Int] = (
     Queries.createItemTable.run,
@@ -45,6 +38,4 @@ object Setup {
       _ <- Queries.dropTagTable.run.transact(xa)
       _ <- Queries.dropItem2TagTable.run.transact(xa)
     } yield ()
-
-  // ran Setup.runCreateTables.unsafeRunSync()
 }
