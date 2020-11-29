@@ -12,21 +12,87 @@ I wanted to be able to look up items by tags. Either a single tag or a list of t
 
 /items: returns a list of items
 
+curl http://localhost:8080/items
+
+[{"id": 1, "name": "backpack", "description": "50 litre pack"}]
+
+
+
 /items/(name): Returns the item by name
 
-/itemsByTab/(tag): Returns a list of items with a tag
+curl http://localhost:8080/items/backpack
 
-/itemsByTagList : json list curl -X PUT -d ''["tag1", "tag2", "tag3"]' http://itemsByTagList
+[{"id": 1, "name": "backpack", "description": "50 litre pack"},
+
+{"id": 2, "name": "Zen", "description": "171cm G3 Zen Oxide"}]
+
+
+
+/itemsByTag/(tag): Returns a list of items with a tag
+
+curl http://localhost:8080/itemsByTag/camping
+
+[{"id": 1, "name": "backpack", "description": "50 litre pack"}]
+
+
+
+/itemsByTagList : json list 
+
+curl --header "Content-Type: application/json" \
+
+--request GET \
+
+--data '["camping", "skiing"]' \
+
+http://localhost:8080/itemsByTagList
+
+[{"id": 1, "name": "backpack", "description": "50 litre pack"},
+
+{"id": 2, "name": "Zen", "description": "171cm G3 Zen Oxide"}]
+
+
 
 /insertItem: passes json representation of item and inserts the item
 
+curl --header "Content-Type: application/json" \
+
+--request PUT \\
+
+--data '{"name": "backpack", "description": "50 litre pack"}' \
+
+http://localhost:8080/insertItem
+
+
+
 /removeItem/id : remove the item by integer id
+
+curl --request POST http://localhost:8080/removeItem/2
+
+
 
 /addTag2Item/IntVar(itemId)/IntVar(tagId): adds the tag associated with item id to the item 
 
+curl --request POST http://localhost:8080/1/1
+
+
+
 /getTags: get a list of tags
 
+curl http://localhost:8080/getTags
+
+
+
 /insertTagList Takes a json list of tags and inserts it to the tag table.
+
+Curl -- header "Content-Type: application/json" \
+
+-- request PUT \
+
+-- data '["camping", "skiing", "climbing"]' \
+
+http://localhost:8080/insertTagList
+
+The number of objects entered will be returned
 
 ## Basic Design
 
@@ -64,5 +130,13 @@ This wraps everything together and launches the application. In this implementat
 
 A key part of this exercise was writing tests.
 
+## Setup Database
 
+During the development and test process, I used Postgres which was completely unnecessary. Sqlite would have worked perfectly for development. Postgres is run via Docker. Configuration is maintained in the docker-compose.yml file in the GearShed directory. To get the database up and running simply type "GearShed> docker-compose up"
+
+From the sbt console, you can set-up the tables "scala> shed.Setup.runCreateTables.unsafeRunSync()"
+
+## Run the Server!
+
+GearShed> sbt run
 
