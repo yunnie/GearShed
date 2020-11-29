@@ -25,7 +25,6 @@ import shed.Setup
 
 
 object Pad {
-  // Case class for a transactor (doobie)
   type TagLabel = String
   val item1 = Item(None, "item1", Some("description1"))
   val item2 = Item(None, "item2", Some("description2"))
@@ -45,38 +44,25 @@ object Pad {
 
   val cleanup: IO[Unit] = Setup.runDropTables
 
-
   val ShedServices = new GearShedService(new GearShed(xa))
-  // For the put try using the org.http4s.client.dsl._
-  // There are two implicit classes
-  //
-  // org.htt4s.Method.IdempotentitMethodWithBody does not 
-  // take parameters fr the PUT()
+
   val insertItem1 = PUT(item1json, uri"/insertItem").unsafeRunSync()
+
   val insertItem2 = Request[IO](Method.PUT, uri"/insertItem").withEntity(item2.asJson) 
+
   val getListItems = Request[IO](Method.GET, uri"/items")
 
   val ioInsertItem1 = ShedServices.routes.run(insertItem1)
-  val ioInsertItem2 = ShedServices.routes.run(insertItem2)
 
-  //use result = ioInsertItem1.unsafeRunSync()
-  //result.as[Json].unsafeRunSync()
+  val ioInsertItem2 = ShedServices.routes.run(insertItem2)
 
   val io = ShedServices.routes.run(getListItems)
 
-  // Read file
-  // Utilizes cats.effect bracket to 
-  // open, use and close the file
-  // Want to use the readFile to read in the configuration files
-  // Need to store the configurations as Json
-  
   def readFile(file: String): IO[List[String]] = 
     IO(scala.io.Source.fromFile(file)).bracket { 
-      // Use
       source =>
         IO(source.getLines().toList)
       } { 
-      // Close
       source => 
         IO(source.close())
       }
@@ -88,8 +74,6 @@ object Pad {
       writer => IO(writer.close())
     }
 
-  // Read and write files without using bracket
-  
   def readFileAlt(file: String): IO[List[String]] =
     for {
       source <- IO(scala.io.Source.fromFile(file))

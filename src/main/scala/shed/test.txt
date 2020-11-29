@@ -1,2 +1,0 @@
-{"config":"config1", "key1":"value1"}
-{"config":"config2", "key2":"value2"}

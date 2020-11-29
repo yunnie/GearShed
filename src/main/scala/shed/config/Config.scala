@@ -23,10 +23,6 @@ case class ServerConfig(
 
 object Config {
 
-  /* 
-   * Add implicit decoders to decode the configuration 
-   * file into DbConfig and ServerConfig class objects 
-   */
   implicit val decodeDbConfig: Decoder[DbConfig] = 
     new Decoder[DbConfig] {
       final def apply(c: HCursor): Decoder.Result[DbConfig] =
@@ -47,22 +43,13 @@ object Config {
         } yield ServerConfig(host, port)
     }
   
-  /* 
-   * Read in the configuration files and create
-   * a DbConfig object and a ServerConfig object
-   */
-
   val myDbConfig: IO[DbConfig] = 
     parser.decodePathF[IO, DbConfig]("db")
 
   val myServerConfig: IO[ServerConfig]  = 
     parser.decodePathF[IO, ServerConfig]("server")
 
-  /* 
-   * Create a database transactor to run the doobie queries
-   */
   def createTransactor(dbConf: DbConfig): Transactor.Aux[IO,Unit] = {
-    // Create a simple transactor for development purposes
     implicit val cs = IO.contextShift(ExecutionContexts.synchronous)
     val xa = Transactor.fromDriverManager[IO](
       dbConf.driver, 
@@ -74,11 +61,7 @@ object Config {
     xa
   }
 
-  /* Wrap the createTransactor function into an IO monad
-   * so that it can be used in a monad sequence
-   */
   def createIoTransactor(dbConf: IO[DbConfig]): 
     IO[Transactor.Aux[IO,Unit]] = 
       dbConf.map(conf => createTransactor(conf))
 }
-
