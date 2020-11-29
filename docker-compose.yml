@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: 'shed'  
+    ports:
+      - 5432:5432
